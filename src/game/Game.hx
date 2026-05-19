@@ -66,6 +66,7 @@ class Game extends AppChildProcess {
 
 		level = new Level(l);
 		// <---- Here: instanciate your level entities
+		new en.Hero();
 
 		camera.centerOnTarget();
 		hud.onLevelStart();
