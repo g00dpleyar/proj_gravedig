@@ -10,7 +10,14 @@ package en;
 
 class Hero extends Entity {
 	var ca : ControllerAccess<GameAction>;
-	var walkSpeed = 0.;
+
+	var horizontalInput = 0.;
+
+	// Ground movement tuning
+	var maxGroundSpeed = 0.18;
+	var groundAccel = 0.035;
+	var groundDecel = 0.050;
+	var groundTurnAccel = 0.075;
 
 	// This is TRUE if the player is not falling
 	var onGround(get,never) : Bool;
@@ -26,7 +33,7 @@ class Hero extends Entity {
 			setPosCase(start.cx, start.cy);
 
 		// Misc inits
-		vBase.setFricts(0.84, 0.94);
+		vBase.setFricts(1, 0.94);
 
 		// Camera tracks this
 		camera.trackEntity(this, true);
@@ -89,7 +96,7 @@ class Hero extends Entity {
 	override function preUpdate() {
 		super.preUpdate();
 
-		walkSpeed = 0;
+		horizontalInput = 0;
 		if( onGround )
 			cd.setS("recentlyOnGround",0.1); // allows "just-in-time" jumps
 
@@ -106,7 +113,7 @@ class Hero extends Entity {
 		// Walk
 		if( !isChargingAction() && ca.getAnalogDist2(MoveLeft,MoveRight)>0 ) {
 			// As mentioned above, we don't touch physics values (eg. `dx`) here. We just store some "requested walk speed", which will be applied to actual physics in fixedUpdate.
-			walkSpeed = ca.getAnalogValue2(MoveLeft,MoveRight); // -1 to 1
+			horizontalInput = ca.getAnalogValue2(MoveLeft,MoveRight); // -1 to 1
 		}
 	}
 
@@ -119,7 +126,39 @@ class Hero extends Entity {
 			vBase.addY(0.05);
 
 		// Apply requested walk movement
-		if( walkSpeed!=0 )
-			vBase.addX( walkSpeed*0.045 ); // some arbitrary speed
+		if( onGround ) {
+			var targetSpeed = horizontalInput * maxGroundSpeed;
+
+			if( horizontalInput==0 ) {
+				// No input: decelerate toward 0
+				if( Math.abs(vBase.dx) <= groundDecel )
+					vBase.clearX();
+				else if( vBase.dx > 0 )
+					vBase.addX(-groundDecel);
+				else
+					vBase.addX(groundDecel);
+			}
+			else if( vBase.dx!=0 && (vBase.dx>0) != (targetSpeed>0) ) {
+				// Pressing opposite direction: turn around quickly
+				if( targetSpeed > 0 )
+					vBase.addX( Math.min(groundTurnAccel, targetSpeed - vBase.dx) );
+				else
+					vBase.addX( Math.max(-groundTurnAccel, targetSpeed - vBase.dx) );
+			}
+			else {
+				// Pressing same direction: accelerate toward target speed,
+				// but don't kill extra speed if we already have it.
+				if( targetSpeed > 0 && vBase.dx < targetSpeed )
+					vBase.addX( Math.min(groundAccel, targetSpeed - vBase.dx) );
+
+				if( targetSpeed < 0 && vBase.dx > targetSpeed )
+					vBase.addX( Math.max(-groundAccel, targetSpeed - vBase.dx) );
+			}
+		}
+		else {
+			if( horizontalInput!=0 )
+				vBase.addX(horizontalInput*0.045);
+		}
+
 	}
 }
