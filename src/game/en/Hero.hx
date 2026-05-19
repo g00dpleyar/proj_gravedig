@@ -1,7 +1,7 @@
 package en;
 
 /**
-	SamplePlayer is an Entity with some extra functionalities:
+	Hero is the player-controlled platformer character.
 	- user controlled (using gamepad or keyboard)
 	- falls with gravity
 	- has basic level collisions

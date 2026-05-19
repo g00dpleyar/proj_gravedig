@@ -5,8 +5,7 @@ class Const {
 #if !macro
 
 	/** Default engine framerate (60) **/
-	public static var FPS(get,never) : Int;
-		static inline function get_FPS() return Std.int( hxd.System.getDefaultFrameRate() );
+	public static final FPS = 60;
 
 	/**
 		"Fixed" updates framerate. 30fps is a good value here, as it's almost guaranteed to work on any decent setup, and it's more than enough to run any gameplay related physics.
