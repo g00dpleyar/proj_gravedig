@@ -14,10 +14,19 @@ class Hero extends Entity {
 	var horizontalInput = 0.;
 
 	// Ground movement tuning
-	var maxGroundSpeed = 0.18;
-	var groundAccel = 0.035;
-	var groundDecel = 0.050;
-	var groundTurnAccel = 0.075;
+	var maxGroundSpeed = 0.32;
+	var groundAccel = 0.085;
+	var groundDecel = 0.120;
+	var groundTurnAccel = 0.160;
+	var groundAccelMin = 0.020;
+
+	//Air movement horizontal tuning
+	// Air movement tuning
+	var maxAirSpeed = 0.32;
+	var airAccel = 0.025;
+	var airDecel = 0.004;
+	var airTurnAccel = 0.085;
+	var airAccelMin = 0.006;
 
 	// This is TRUE if the player is not falling
 	var onGround(get,never) : Bool;
@@ -148,17 +157,46 @@ class Hero extends Entity {
 			else {
 				// Pressing same direction: accelerate toward target speed,
 				// but don't kill extra speed if we already have it.
+				var speedDiff = targetSpeed - vBase.dx;
+				var speedDiffRatio = Math.min(1, Math.abs(speedDiff) / maxGroundSpeed);
+
+				var easedAccel = groundAccelMin + (groundAccel - groundAccelMin) * speedDiffRatio;
+
 				if( targetSpeed > 0 && vBase.dx < targetSpeed )
-					vBase.addX( Math.min(groundAccel, targetSpeed - vBase.dx) );
+					vBase.addX( Math.min(easedAccel, speedDiff) );
 
 				if( targetSpeed < 0 && vBase.dx > targetSpeed )
-					vBase.addX( Math.max(-groundAccel, targetSpeed - vBase.dx) );
+					vBase.addX( Math.max(-easedAccel, speedDiff) );
 			}
 		}
 		else {
-			if( horizontalInput!=0 )
-				vBase.addX(horizontalInput*0.045);
-		}
+		var targetSpeed = horizontalInput * maxAirSpeed;
 
+		if( horizontalInput==0 ) {
+			if( Math.abs(vBase.dx) <= airDecel )
+				vBase.clearX();
+			else if( vBase.dx > 0 )
+				vBase.addX(-airDecel);
+			else
+				vBase.addX(airDecel);
+		}
+		else if( vBase.dx!=0 && (vBase.dx>0) != (targetSpeed>0) ) {
+			if( targetSpeed > 0 )
+				vBase.addX( Math.min(airTurnAccel, targetSpeed - vBase.dx) );
+			else
+				vBase.addX( Math.max(-airTurnAccel, targetSpeed - vBase.dx) );
+		}
+		else {
+				var speedDiff = targetSpeed - vBase.dx;
+				var speedDiffRatio = Math.min(1, Math.abs(speedDiff) / maxAirSpeed);
+				var easedAccel = airAccelMin + (airAccel - airAccelMin) * speedDiffRatio;
+
+				if( targetSpeed > 0 && vBase.dx < targetSpeed )
+					vBase.addX( Math.min(easedAccel, speedDiff) );
+
+				if( targetSpeed < 0 && vBase.dx > targetSpeed )
+					vBase.addX( Math.max(-easedAccel, speedDiff) );
+			}
+		}
 	}
 }
