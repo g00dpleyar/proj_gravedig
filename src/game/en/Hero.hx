@@ -21,12 +21,16 @@ class Hero extends Entity {
 	var groundAccelMin = 0.020;
 
 	//Air movement horizontal tuning
-	// Air movement tuning
 	var maxAirSpeed = 0.32;
 	var airAccel = 0.025;
 	var airDecel = 0.004;
 	var airTurnAccel = 0.085;
 	var airAccelMin = 0.006;
+
+	//Jump tuning
+	var jumpCutMultiplier = 0.45;
+	var jumpPressed = false;
+	var jumpReleased = false;
 
 	// This is TRUE if the player is not falling
 	var onGround(get,never) : Bool;
@@ -106,12 +110,29 @@ class Hero extends Entity {
 		super.preUpdate();
 
 		horizontalInput = 0;
-		if( onGround )
-			cd.setS("recentlyOnGround",0.1); // allows "just-in-time" jumps
 
+		// Walk
+		if( !isChargingAction() && ca.getAnalogDist2(MoveLeft,MoveRight)>0 ) {
+			// As mentioned above, we don't touch physics values (eg. `dx`) here. We just store some "requested walk speed", which will be applied to actual physics in fixedUpdate.
+			horizontalInput = ca.getAnalogValue2(MoveLeft,MoveRight); // -1 to 1
+		}
+
+		if( ca.isPressed(Jump) )
+		jumpPressed = true;
+
+		if( ca.isReleased(Jump) )
+			jumpReleased = true;
+	}
+
+
+	override function fixedUpdate() {
+		super.fixedUpdate();
+
+		if( onGround )
+			cd.setS("recentlyOnGround", 0.1);
 
 		// Jump
-		if( cd.has("recentlyOnGround") && ca.isPressed(Jump) ) {
+		if( cd.has("recentlyOnGround") && jumpPressed ) {
 			vBase.addY(-0.85);
 			setSquashX(0.6);
 			cd.unset("recentlyOnGround");
@@ -119,17 +140,16 @@ class Hero extends Entity {
 			ca.rumble(0.05, 0.06);
 		}
 
-		// Walk
-		if( !isChargingAction() && ca.getAnalogDist2(MoveLeft,MoveRight)>0 ) {
-			// As mentioned above, we don't touch physics values (eg. `dx`) here. We just store some "requested walk speed", which will be applied to actual physics in fixedUpdate.
-			horizontalInput = ca.getAnalogValue2(MoveLeft,MoveRight); // -1 to 1
+		// Variable jump height
+		if( jumpReleased && vBase.dy < 0 ) {
+			var oldDy = vBase.dy;
+			vBase.clearY();
+			vBase.addY(oldDy * jumpCutMultiplier);
 		}
-	}
 
-
-	override function fixedUpdate() {
-		super.fixedUpdate();
-
+		jumpPressed = false;
+		jumpReleased = false;
+		
 		// Gravity
 		if( !onGround )
 			vBase.addY(0.05);
