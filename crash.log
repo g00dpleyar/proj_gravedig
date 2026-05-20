@@ -1,0 +1,22 @@
+Null access .resume
+BUILD: 2026-05-20-17-22-32--hlsdl-64
+EXCEPTION:
+
+Called from ui.Window.onDispose (ui/Window.hx line 115)
+Called from dn.$Process._disposeProcess (dn/Process.hx line 701)
+Called from dn.$Process._garbageCollector (dn/Process.hx line 673)
+Called from dn.$Process._disposeProcess (dn/Process.hx line 686)
+Called from dn.$Process._garbageCollector (dn/Process.hx line 673)
+Called from dn.$Process.updateAll (dn/Process.hx line 766)
+Called from Boot.update (Boot.hx line 64)
+CALL:
+
+Called from $App.onCrash (App.hx line 89)
+Called from Boot.update (Boot.hx line 71)
+Called from hxd.App.mainLoop (hxd/App.hx line 199)
+Called from hxd.$System.mainLoop (hxd/System.hl.hx line 81)
+Called from hxd.$System.runMainLoop (hxd/System.hl.hx line 173)
+Called from haxe.$Timer.~delay.0 (/usr/local/lib/haxe/std/haxe/Timer.hx line 149)
+Called from haxe.$Timer.~__constructor__.0 (/usr/local/lib/haxe/std/haxe/Timer.hx line 81)
+Called from sys.thread.EventLoop.loop (/usr/local/lib/haxe/std/sys/thread/EventLoop.hx line 183)
+Called from sys.thread._Thread.$Thread_Impl_.processEvents (/usr/local/lib/haxe/std/hl/_std/sys/thread/Thread.hx line 83)

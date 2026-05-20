@@ -9,6 +9,10 @@ package en;
 **/
 
 class Hero extends Entity {
+	#if moveDebug
+	var movementDebugWindow : Null<ui.win.MovementDebugWindow>;
+	#end
+
 	var ca : ControllerAccess<GameAction>;
 
 	var horizontalInput = 0.;
@@ -80,6 +84,12 @@ class Hero extends Entity {
 	override function dispose() {
 		super.dispose();
 		ca.dispose(); // don't forget to dispose controller accesses
+		#if moveDebug
+		if( movementDebugWindow!=null && !movementDebugWindow.destroyed ) {
+			movementDebugWindow.close();
+			movementDebugWindow = null;
+		}
+		#end
 	}
 
 
@@ -137,6 +147,17 @@ class Hero extends Entity {
 
 		if( ca.isReleased(Jump) )
 			jumpReleased = true;
+
+		#if moveDebug
+		if( hxd.Key.isPressed(hxd.Key.TAB) ) {
+			if( movementDebugWindow==null || movementDebugWindow.destroyed )
+				movementDebugWindow = new ui.win.MovementDebugWindow(getMovementDebugText);
+			else {
+				movementDebugWindow.close();
+				movementDebugWindow = null;
+			}
+		}
+		#end
 	}
 
 
@@ -264,4 +285,41 @@ class Hero extends Entity {
 		vBase.clearY();
 		vBase.addY(v);
 	}
+
+	#if moveDebug
+	public function getMovementDebugText() {
+		return
+			"Horizontal"
+			+ "\nmaxGroundSpeed: " + maxGroundSpeed
+			+ "\ngroundAccel: " + groundAccel
+			+ "\ngroundDecel: " + groundDecel
+			+ "\ngroundTurnAccel: " + groundTurnAccel
+			+ "\ngroundAccelMin: " + groundAccelMin
+
+			+ "\n\nAir"
+			+ "\nmaxAirSpeed: " + maxAirSpeed
+			+ "\nairAccel: " + airAccel
+			+ "\nairDecel: " + airDecel
+			+ "\nairTurnAccel: " + airTurnAccel
+			+ "\nairAccelMin: " + airAccelMin
+
+			+ "\n\nJump"
+			+ "\njumpPower: " + jumpPower
+			+ "\njumpCutMultiplier: " + jumpCutMultiplier
+			+ "\ncoyoteFrames: " + coyoteFrames
+			+ "\njumpBufferFrames: " + jumpBufferFrames
+
+			+ "\n\nGravity"
+			+ "\nriseGravity: " + riseGravity
+			+ "\napexGravity: " + apexGravity
+			+ "\napexThreshold: " + apexThreshold
+			+ "\nfallGravity: " + fallGravity
+			+ "\nmaxFallSpeed: " + maxFallSpeed
+
+			+ "\n\nState"
+			+ "\nonGround: " + onGround
+			+ "\nvBase.dx: " + vBase.dx
+			+ "\nvBase.dy: " + vBase.dy;
+	}
+	#end
 }
