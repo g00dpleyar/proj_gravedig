@@ -32,6 +32,13 @@ class Hero extends Entity {
 	var jumpPressed = false;
 	var jumpReleased = false;
 
+	var coyoteFrames = 6;
+	var jumpBufferFrames = 6;
+
+	// Current remaining time
+	var coyoteTimer = 0.;
+	var jumpBufferTimer = 0.;
+
 	// This is TRUE if the player is not falling
 	var onGround(get,never) : Bool;
 		inline function get_onGround() return !destroyed && vBase.dy==0 && yr==1 && level.hasCollision(cx,cy+1);
@@ -128,14 +135,28 @@ class Hero extends Entity {
 	override function fixedUpdate() {
 		super.fixedUpdate();
 
+		var fixedDt = 1.0 / Const.FIXED_UPDATE_FPS;
+
+		// Coyote time
 		if( onGround )
-			cd.setS("recentlyOnGround", 0.1);
+			coyoteTimer = coyoteFrames / 60;
+		else if( coyoteTimer > 0 )
+			coyoteTimer -= fixedDt;
+
+		// Jump buffer
+		if( jumpPressed )
+			jumpBufferTimer = jumpBufferFrames / 60;
+		else if( jumpBufferTimer > 0 )
+			jumpBufferTimer -= fixedDt;
 
 		// Jump
-		if( cd.has("recentlyOnGround") && jumpPressed ) {
+		if( coyoteTimer > 0 && jumpBufferTimer > 0 ) {
 			vBase.addY(-0.85);
 			setSquashX(0.6);
-			cd.unset("recentlyOnGround");
+
+			coyoteTimer = 0;
+			jumpBufferTimer = 0;
+
 			fx.dotsExplosionExample(centerX, centerY, 0xffcc00);
 			ca.rumble(0.05, 0.06);
 		}
