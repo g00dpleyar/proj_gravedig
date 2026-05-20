@@ -39,6 +39,11 @@ class Hero extends Entity {
 	var coyoteTimer = 0.;
 	var jumpBufferTimer = 0.;
 
+	// Gravity
+	var riseGravity = 0.05;
+	var fallGravity = 0.08;
+	var maxFallSpeed = 0.95;
+
 	// This is TRUE if the player is not falling
 	var onGround(get,never) : Bool;
 		inline function get_onGround() return !destroyed && vBase.dy==0 && yr==1 && level.hasCollision(cx,cy+1);
@@ -163,17 +168,23 @@ class Hero extends Entity {
 
 		// Variable jump height
 		if( jumpReleased && vBase.dy < 0 ) {
-			var oldDy = vBase.dy;
-			vBase.clearY();
-			vBase.addY(oldDy * jumpCutMultiplier);
+			setBaseDy(vBase.dy * jumpCutMultiplier);
 		}
 
 		jumpPressed = false;
 		jumpReleased = false;
 		
 		// Gravity
-		if( !onGround )
-			vBase.addY(0.05);
+		if( !onGround ) {
+			if( vBase.dy > 0 )
+				vBase.addY(fallGravity);
+			else
+				vBase.addY(riseGravity);
+
+			if( vBase.dy > maxFallSpeed ) {
+				setBaseDy(maxFallSpeed);
+			}
+		}
 
 		// Apply requested walk movement
 		if( onGround ) {
@@ -239,5 +250,14 @@ class Hero extends Entity {
 					vBase.addX( Math.max(-easedAccel, speedDiff) );
 			}
 		}
+	}
+	function setBaseDx(v:Float) {
+	vBase.clearX();
+	vBase.addX(v);
+	}
+
+	function setBaseDy(v:Float) {
+		vBase.clearY();
+		vBase.addY(v);
 	}
 }
