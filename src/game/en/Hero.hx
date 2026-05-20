@@ -43,6 +43,8 @@ class Hero extends Entity {
 	var riseGravity = 0.05;
 	var fallGravity = 0.08;
 	var maxFallSpeed = 0.95;
+	var apexGravity = 0.035;
+	var apexThreshold = 0.12;
 
 	// This is TRUE if the player is not falling
 	var onGround(get,never) : Bool;
@@ -176,14 +178,15 @@ class Hero extends Entity {
 		
 		// Gravity
 		if( !onGround ) {
-			if( vBase.dy > 0 )
+			if( Math.abs(vBase.dy) <= apexThreshold )
+				vBase.addY(apexGravity);
+			else if( vBase.dy > 0 )
 				vBase.addY(fallGravity);
 			else
 				vBase.addY(riseGravity);
 
-			if( vBase.dy > maxFallSpeed ) {
+			if( vBase.dy > maxFallSpeed )
 				setBaseDy(maxFallSpeed);
-			}
 		}
 
 		// Apply requested walk movement
