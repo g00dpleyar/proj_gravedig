@@ -28,6 +28,7 @@ class Hero extends Entity {
 	var airAccelMin = 0.006;
 
 	//Jump tuning
+	var jumpPower = 0.85;
 	var jumpCutMultiplier = 0.45;
 	var jumpPressed = false;
 	var jumpReleased = false;
@@ -158,7 +159,7 @@ class Hero extends Entity {
 
 		// Jump
 		if( coyoteTimer > 0 && jumpBufferTimer > 0 ) {
-			vBase.addY(-0.85);
+			vBase.addY(-jumpPower);
 			setSquashX(0.6);
 
 			coyoteTimer = 0;
