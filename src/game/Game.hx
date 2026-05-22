@@ -1,6 +1,11 @@
 class Game extends AppChildProcess {
 	public static var ME : Game;
 
+	/**Movement tuning window**/
+	#if moveDebug
+	var movementDebugWindow : Null<ui.win.MovementDebugWindow>;
+	#end
+
 	/** Game controller (pad or keyboard) **/
 	public var ca : ControllerAccess<GameAction>;
 
@@ -60,6 +65,14 @@ class Game extends AppChildProcess {
 
 	/** Load a level **/
 	function startLevel(l:World.World_Level) {
+
+		#if moveDebug
+		if( movementDebugWindow!=null && !movementDebugWindow.destroyed ) {
+			movementDebugWindow.close();
+			movementDebugWindow = null;
+		}
+		#end
+
 		if( level!=null )
 			level.destroy();
 		fx.clear();
@@ -174,6 +187,17 @@ class Game extends AppChildProcess {
 	/** Loop that happens at the beginning of the frame **/
 	override function preUpdate() {
 		super.preUpdate();
+
+		#if moveDebug
+		if( hxd.Key.isPressed(hxd.Key.TAB) && hero!=null && !hero.destroyed ) {
+			if( movementDebugWindow==null || movementDebugWindow.destroyed )
+				movementDebugWindow = new ui.win.MovementDebugWindow(hero.tuning);
+			else {
+				movementDebugWindow.close();
+				movementDebugWindow = null;
+			}
+		}
+		#end
 
 		for(e in Entity.ALL) if( !e.destroyed ) e.preUpdate();
 	}

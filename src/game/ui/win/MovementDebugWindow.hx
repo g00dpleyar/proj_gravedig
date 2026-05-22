@@ -5,14 +5,14 @@ class MovementDebugWindow extends ui.Window {
 	static inline var PANEL_H = 185;
 	static inline var PADDING = 6;
 
-	var getTextCb : Void->String;
+	var tuning : data.MovementTuning;
 	var leftText : h2d.Text;
 	var rightText : h2d.Text;
 
-	public function new(getText:Void->String) {
+	public function new(tuning:data.MovementTuning) {
 		super(false);
 
-		getTextCb = getText;
+		this.tuning = tuning;
 
 		setAlign(Start, Start);
 
@@ -40,7 +40,38 @@ class MovementDebugWindow extends ui.Window {
 	}
 
 	function updateText() {
-		var lines = getTextCb().split("\n");
+		var lines = [
+			"Horizontal",
+			"maxGroundSpeed: " + tuning.maxGroundSpeed,
+			"groundAccel: " + tuning.groundAccel,
+			"groundDecel: " + tuning.groundDecel,
+			"groundTurnAccel: " + tuning.groundTurnAccel,
+			"groundAccelMin: " + tuning.groundAccelMin,
+
+			"",
+			"Air",
+			"maxAirSpeed: " + tuning.maxAirSpeed,
+			"airAccel: " + tuning.airAccel,
+			"airDecel: " + tuning.airDecel,
+			"airTurnAccel: " + tuning.airTurnAccel,
+			"airAccelMin: " + tuning.airAccelMin,
+
+			"",
+			"Jump",
+			"jumpPower: " + tuning.jumpPower,
+			"jumpCutMultiplier: " + tuning.jumpCutMultiplier,
+			"coyoteFrames: " + tuning.coyoteFrames,
+			"jumpBufferFrames: " + tuning.jumpBufferFrames,
+
+			"",
+			"Gravity",
+			"riseGravity: " + tuning.riseGravity,
+			"apexGravity: " + tuning.apexGravity,
+			"apexThreshold: " + tuning.apexThreshold,
+			"fallGravity: " + tuning.fallGravity,
+			"maxFallSpeed: " + tuning.maxFallSpeed,
+		];
+
 		var half = Math.ceil(lines.length / 2);
 
 		leftText.text = lines.slice(0, half).join("\n");

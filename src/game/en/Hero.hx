@@ -9,9 +9,6 @@ package en;
 **/
 
 class Hero extends Entity {
-	#if moveDebug
-	var movementDebugWindow : Null<ui.win.MovementDebugWindow>;
-	#end
 
 	var ca : ControllerAccess<GameAction>;
 
@@ -59,12 +56,6 @@ class Hero extends Entity {
 	override function dispose() {
 		super.dispose();
 		ca.dispose(); // don't forget to dispose controller accesses
-		#if moveDebug
-		if( movementDebugWindow!=null && !movementDebugWindow.destroyed ) {
-			movementDebugWindow.close();
-			movementDebugWindow = null;
-		}
-		#end
 	}
 
 
@@ -122,17 +113,6 @@ class Hero extends Entity {
 
 		if( ca.isReleased(Jump) )
 			jumpReleased = true;
-
-		#if moveDebug
-		if( hxd.Key.isPressed(hxd.Key.TAB) ) {
-			if( movementDebugWindow==null || movementDebugWindow.destroyed )
-				movementDebugWindow = new ui.win.MovementDebugWindow(getMovementDebugText);
-			else {
-				movementDebugWindow.close();
-				movementDebugWindow = null;
-			}
-		}
-		#end
 	}
 
 
@@ -260,41 +240,4 @@ class Hero extends Entity {
 		vBase.clearY();
 		vBase.addY(v);
 	}
-
-	#if moveDebug
-	public function getMovementDebugText() {
-		return
-			"Horizontal"
-			+ "\ntuning.maxGroundSpeed: " + tuning.maxGroundSpeed
-			+ "\ntuning.groundAccel: " + tuning.groundAccel
-			+ "\ntuning.groundDecel: " + tuning.groundDecel
-			+ "\ntuning.groundTurnAccel: " + tuning.groundTurnAccel
-			+ "\ntuning.groundAccelMin: " + tuning.groundAccelMin
-
-			+ "\n\nAir"
-			+ "\ntuning.maxAirSpeed: " + tuning.maxAirSpeed
-			+ "\ntuning.airAccel: " + tuning.airAccel
-			+ "\ntuning.airDecel: " + tuning.airDecel
-			+ "\ntuning.airTurnAccel: " + tuning.airTurnAccel
-			+ "\ntuning.airAccelMin: " + tuning.airAccelMin
-
-			+ "\n\nJump"
-			+ "\ntuning.jumpPower: " + tuning.jumpPower
-			+ "\ntuning.jumpCutMultiplier: " + tuning.jumpCutMultiplier
-			+ "\ntuning.coyoteFrames: " + tuning.coyoteFrames
-			+ "\ntuning.jumpBufferFrames: " + tuning.jumpBufferFrames
-
-			+ "\n\nGravity"
-			+ "\ntuning.riseGravity: " + tuning.riseGravity
-			+ "\ntuning.apexGravity: " + tuning.apexGravity
-			+ "\ntuning.apexThreshold: " + tuning.apexThreshold
-			+ "\ntuning.fallGravity: " + tuning.fallGravity
-			+ "\ntuning.maxFallSpeed: " + tuning.maxFallSpeed
-
-			+ "\n\nState"
-			+ "\nonGround: " + onGround
-			+ "\nvBase.dx: " + vBase.dx
-			+ "\nvBase.dy: " + vBase.dy;
-	}
-	#end
 }
