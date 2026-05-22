@@ -1,0 +1,21 @@
+{
+  "airAccel": 0.025,
+  "airAccelMin": 0.006,
+  "airDecel": 0.004,
+  "airTurnAccel": 0.085,
+  "apexGravity": 0.035,
+  "apexThreshold": 0.12,
+  "coyoteFrames": 6,
+  "fallGravity": 0.08,
+  "groundAccel": 0.085,
+  "groundAccelMin": 0.02,
+  "groundDecel": 0.12,
+  "groundTurnAccel": 0.16,
+  "jumpBufferFrames": 6,
+  "jumpCutMultiplier": 0.45,
+  "jumpPower": 0.85,
+  "maxAirSpeed": 0.32,
+  "maxFallSpeed": 0.95,
+  "maxGroundSpeed": 1.1,
+  "riseGravity": 0.05
+}
