@@ -6,3 +6,4 @@ res/**/backups/
 
 # VScode
 .vscode/settings.json
+movement_tuning.json
