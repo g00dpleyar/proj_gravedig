@@ -19,6 +19,9 @@ class Game extends AppChildProcess {
 	/** UI **/
 	public var hud : ui.Hud;
 
+	 /** Hero **/
+	 public var hero : en.Hero;
+
 	/** Slow mo internal values**/
 	var curGameSpeed = 1.0;
 	var slowMos : Map<SlowMoId, { id:SlowMoId, t:Float, f:Float }> = new Map();
@@ -66,7 +69,7 @@ class Game extends AppChildProcess {
 
 		level = new Level(l);
 		// <---- Here: instanciate your level entities
-		new en.Hero();
+		hero = new en.Hero();
 
 		camera.centerOnTarget();
 		hud.onLevelStart();
