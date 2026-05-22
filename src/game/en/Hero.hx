@@ -15,41 +15,16 @@ class Hero extends Entity {
 
 	var ca : ControllerAccess<GameAction>;
 
+	public var tuning = new data.MovementTuning();
+
 	var horizontalInput = 0.;
 
-	// Ground movement tuning
-	var maxGroundSpeed = 0.32;
-	var groundAccel = 0.085;
-	var groundDecel = 0.120;
-	var groundTurnAccel = 0.160;
-	var groundAccelMin = 0.020;
-
-	//Air movement horizontal tuning
-	var maxAirSpeed = 0.32;
-	var airAccel = 0.025;
-	var airDecel = 0.004;
-	var airTurnAccel = 0.085;
-	var airAccelMin = 0.006;
-
-	//Jump tuning
-	var jumpPower = 0.85;
-	var jumpCutMultiplier = 0.45;
 	var jumpPressed = false;
 	var jumpReleased = false;
-
-	var coyoteFrames = 6;
-	var jumpBufferFrames = 6;
 
 	// Current remaining time
 	var coyoteTimer = 0.;
 	var jumpBufferTimer = 0.;
-
-	// Gravity
-	var riseGravity = 0.05;
-	var fallGravity = 0.08;
-	var maxFallSpeed = 0.95;
-	var apexGravity = 0.035;
-	var apexThreshold = 0.12;
 
 	// This is TRUE if the player is not falling
 	var onGround(get,never) : Bool;
@@ -168,19 +143,19 @@ class Hero extends Entity {
 
 		// Coyote time
 		if( onGround )
-			coyoteTimer = coyoteFrames / 60;
+			coyoteTimer = tuning.coyoteFrames / 60;
 		else if( coyoteTimer > 0 )
 			coyoteTimer -= fixedDt;
 
 		// Jump buffer
 		if( jumpPressed )
-			jumpBufferTimer = jumpBufferFrames / 60;
+			jumpBufferTimer = tuning.jumpBufferFrames / 60;
 		else if( jumpBufferTimer > 0 )
 			jumpBufferTimer -= fixedDt;
 
 		// Jump
 		if( coyoteTimer > 0 && jumpBufferTimer > 0 ) {
-			vBase.addY(-jumpPower);
+			vBase.addY(-tuning.jumpPower);
 			setSquashX(0.6);
 
 			coyoteTimer = 0;
@@ -192,7 +167,7 @@ class Hero extends Entity {
 
 		// Variable jump height
 		if( jumpReleased && vBase.dy < 0 ) {
-			setBaseDy(vBase.dy * jumpCutMultiplier);
+			setBaseDy(vBase.dy * tuning.jumpCutMultiplier);
 		}
 
 		jumpPressed = false;
@@ -200,44 +175,44 @@ class Hero extends Entity {
 		
 		// Gravity
 		if( !onGround ) {
-			if( Math.abs(vBase.dy) <= apexThreshold )
-				vBase.addY(apexGravity);
+			if( Math.abs(vBase.dy) <= tuning.apexThreshold )
+				vBase.addY(tuning.apexGravity);
 			else if( vBase.dy > 0 )
-				vBase.addY(fallGravity);
+				vBase.addY(tuning.fallGravity);
 			else
-				vBase.addY(riseGravity);
+				vBase.addY(tuning.riseGravity);
 
-			if( vBase.dy > maxFallSpeed )
-				setBaseDy(maxFallSpeed);
+			if( vBase.dy > tuning.maxFallSpeed )
+				setBaseDy(tuning.maxFallSpeed);
 		}
 
 		// Apply requested walk movement
 		if( onGround ) {
-			var targetSpeed = horizontalInput * maxGroundSpeed;
+			var targetSpeed = horizontalInput * tuning.maxGroundSpeed;
 
 			if( horizontalInput==0 ) {
 				// No input: decelerate toward 0
-				if( Math.abs(vBase.dx) <= groundDecel )
+				if( Math.abs(vBase.dx) <= tuning.groundDecel )
 					vBase.clearX();
 				else if( vBase.dx > 0 )
-					vBase.addX(-groundDecel);
+					vBase.addX(-tuning.groundDecel);
 				else
-					vBase.addX(groundDecel);
+					vBase.addX(tuning.groundDecel);
 			}
 			else if( vBase.dx!=0 && (vBase.dx>0) != (targetSpeed>0) ) {
 				// Pressing opposite direction: turn around quickly
 				if( targetSpeed > 0 )
-					vBase.addX( Math.min(groundTurnAccel, targetSpeed - vBase.dx) );
+					vBase.addX( Math.min(tuning.groundTurnAccel, targetSpeed - vBase.dx) );
 				else
-					vBase.addX( Math.max(-groundTurnAccel, targetSpeed - vBase.dx) );
+					vBase.addX( Math.max(-tuning.groundTurnAccel, targetSpeed - vBase.dx) );
 			}
 			else {
 				// Pressing same direction: accelerate toward target speed,
 				// but don't kill extra speed if we already have it.
 				var speedDiff = targetSpeed - vBase.dx;
-				var speedDiffRatio = Math.min(1, Math.abs(speedDiff) / maxGroundSpeed);
+				var speedDiffRatio = Math.min(1, Math.abs(speedDiff) / tuning.maxGroundSpeed);
 
-				var easedAccel = groundAccelMin + (groundAccel - groundAccelMin) * speedDiffRatio;
+				var easedAccel = tuning.groundAccelMin + (tuning.groundAccel - tuning.groundAccelMin) * speedDiffRatio;
 
 				if( targetSpeed > 0 && vBase.dx < targetSpeed )
 					vBase.addX( Math.min(easedAccel, speedDiff) );
@@ -247,26 +222,26 @@ class Hero extends Entity {
 			}
 		}
 		else {
-		var targetSpeed = horizontalInput * maxAirSpeed;
+		var targetSpeed = horizontalInput * tuning.maxAirSpeed;
 
 		if( horizontalInput==0 ) {
-			if( Math.abs(vBase.dx) <= airDecel )
+			if( Math.abs(vBase.dx) <= tuning.airDecel )
 				vBase.clearX();
 			else if( vBase.dx > 0 )
-				vBase.addX(-airDecel);
+				vBase.addX(-tuning.airDecel);
 			else
-				vBase.addX(airDecel);
+				vBase.addX(tuning.airDecel);
 		}
 		else if( vBase.dx!=0 && (vBase.dx>0) != (targetSpeed>0) ) {
 			if( targetSpeed > 0 )
-				vBase.addX( Math.min(airTurnAccel, targetSpeed - vBase.dx) );
+				vBase.addX( Math.min(tuning.airTurnAccel, targetSpeed - vBase.dx) );
 			else
-				vBase.addX( Math.max(-airTurnAccel, targetSpeed - vBase.dx) );
+				vBase.addX( Math.max(-tuning.airTurnAccel, targetSpeed - vBase.dx) );
 		}
 		else {
 				var speedDiff = targetSpeed - vBase.dx;
-				var speedDiffRatio = Math.min(1, Math.abs(speedDiff) / maxAirSpeed);
-				var easedAccel = airAccelMin + (airAccel - airAccelMin) * speedDiffRatio;
+				var speedDiffRatio = Math.min(1, Math.abs(speedDiff) / tuning.maxAirSpeed);
+				var easedAccel = tuning.airAccelMin + (tuning.airAccel - tuning.airAccelMin) * speedDiffRatio;
 
 				if( targetSpeed > 0 && vBase.dx < targetSpeed )
 					vBase.addX( Math.min(easedAccel, speedDiff) );
@@ -290,31 +265,31 @@ class Hero extends Entity {
 	public function getMovementDebugText() {
 		return
 			"Horizontal"
-			+ "\nmaxGroundSpeed: " + maxGroundSpeed
-			+ "\ngroundAccel: " + groundAccel
-			+ "\ngroundDecel: " + groundDecel
-			+ "\ngroundTurnAccel: " + groundTurnAccel
-			+ "\ngroundAccelMin: " + groundAccelMin
+			+ "\ntuning.maxGroundSpeed: " + tuning.maxGroundSpeed
+			+ "\ntuning.groundAccel: " + tuning.groundAccel
+			+ "\ntuning.groundDecel: " + tuning.groundDecel
+			+ "\ntuning.groundTurnAccel: " + tuning.groundTurnAccel
+			+ "\ntuning.groundAccelMin: " + tuning.groundAccelMin
 
 			+ "\n\nAir"
-			+ "\nmaxAirSpeed: " + maxAirSpeed
-			+ "\nairAccel: " + airAccel
-			+ "\nairDecel: " + airDecel
-			+ "\nairTurnAccel: " + airTurnAccel
-			+ "\nairAccelMin: " + airAccelMin
+			+ "\ntuning.maxAirSpeed: " + tuning.maxAirSpeed
+			+ "\ntuning.airAccel: " + tuning.airAccel
+			+ "\ntuning.airDecel: " + tuning.airDecel
+			+ "\ntuning.airTurnAccel: " + tuning.airTurnAccel
+			+ "\ntuning.airAccelMin: " + tuning.airAccelMin
 
 			+ "\n\nJump"
-			+ "\njumpPower: " + jumpPower
-			+ "\njumpCutMultiplier: " + jumpCutMultiplier
-			+ "\ncoyoteFrames: " + coyoteFrames
-			+ "\njumpBufferFrames: " + jumpBufferFrames
+			+ "\ntuning.jumpPower: " + tuning.jumpPower
+			+ "\ntuning.jumpCutMultiplier: " + tuning.jumpCutMultiplier
+			+ "\ntuning.coyoteFrames: " + tuning.coyoteFrames
+			+ "\ntuning.jumpBufferFrames: " + tuning.jumpBufferFrames
 
 			+ "\n\nGravity"
-			+ "\nriseGravity: " + riseGravity
-			+ "\napexGravity: " + apexGravity
-			+ "\napexThreshold: " + apexThreshold
-			+ "\nfallGravity: " + fallGravity
-			+ "\nmaxFallSpeed: " + maxFallSpeed
+			+ "\ntuning.riseGravity: " + tuning.riseGravity
+			+ "\ntuning.apexGravity: " + tuning.apexGravity
+			+ "\ntuning.apexThreshold: " + tuning.apexThreshold
+			+ "\ntuning.fallGravity: " + tuning.fallGravity
+			+ "\ntuning.maxFallSpeed: " + tuning.maxFallSpeed
 
 			+ "\n\nState"
 			+ "\nonGround: " + onGround
